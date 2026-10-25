@@ -3,7 +3,7 @@ using ChromeDino.Player;
 
 namespace ChromeDino.Interactables
 {
-    // مانع هوایی با حرکت نوسانی پرواز
+    // Flying air obstacle
     public class AirObstacle : Interactable
     {
         [SerializeField] private int damageAmount = 1;
@@ -21,7 +21,7 @@ namespace ChromeDino.Interactables
         {
             base.Update();
 
-            // حرکت سینوسی در راستای عمودی
+            // Vertical sine wave bobbing
             float newY = startY + Mathf.Sin(Time.time * bobFrequency) * bobAmplitude;
             transform.position = new Vector3(transform.position.x, newY, transform.position.z);
         }

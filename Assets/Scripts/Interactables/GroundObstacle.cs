@@ -3,7 +3,7 @@ using ChromeDino.Player;
 
 namespace ChromeDino.Interactables
 {
-    // مانع زمینی (مانند کاکتوس و سنگ)
+    // Ground obstacle (e.g. cactus)
     public class GroundObstacle : Interactable
     {
         [SerializeField] private int damageAmount = 1;

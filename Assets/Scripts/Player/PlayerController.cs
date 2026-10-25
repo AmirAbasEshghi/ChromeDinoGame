@@ -11,25 +11,27 @@ namespace ChromeDino.Player
     {
         public static event Action<int> OnHealthChanged;
 
-        [Header("سلامتی")]
+        [Header("Health")]
         [SerializeField] private int maxHealth = 3;
         private int currentHealth;
 
-        [Header("پرش و فیزیک")]
+        [Header("Jump and Physics")]
         [SerializeField] private float jumpForce = 13f;
         [SerializeField] private Transform groundCheck;
         [SerializeField] private float groundRadius = 0.2f;
         [SerializeField] private LayerMask groundLayer;
         private bool isGrounded;
 
-        [Header("دش")]
-        [SerializeField] private float dashSpeed = 16f;
+        [Header("Dash")]
+        [SerializeField] private float dashSpeed = 14f;
         [SerializeField] private float dashDuration = 0.2f;
-        [SerializeField] private float dashCooldown = 1.2f;
+        [SerializeField] private float dashCooldown = 1.0f;
+        [SerializeField] private float returnSpeed = 6f;
         private bool isDashing;
         private float lastDashTime = -10f;
+        private float startX;
 
-        [Header("فیدبک آسیب")]
+        [Header("Damage Feedback")]
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Color hitColor = Color.red;
         private Color normalColor;
@@ -48,6 +50,7 @@ namespace ChromeDino.Player
                 normalColor = spriteRenderer.color;
             }
 
+            startX = transform.position.x;
             currentHealth = maxHealth;
         }
 
@@ -58,9 +61,16 @@ namespace ChromeDino.Player
 
         private void Update()
         {
-            if (currentHealth <= 0 || isDashing) return;
+            if (currentHealth <= 0) return;
 
-            // بررسی تماس با زمین
+            // Smooth return to base position after dash
+            if (!isDashing && Mathf.Abs(transform.position.x - startX) > 0.01f)
+            {
+                float newX = Mathf.MoveTowards(transform.position.x, startX, returnSpeed * Time.deltaTime);
+                transform.position = new Vector3(newX, transform.position.y, transform.position.z);
+            }
+
+            // Ground check
             if (groundCheck != null)
             {
                 isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundRadius, groundLayer);
@@ -72,17 +82,19 @@ namespace ChromeDino.Player
                 animator.SetBool("Run", isGrounded);
             }
 
+            if (isDashing) return;
+
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
 
-            // پرش با کلید اسپیس
+            // Jump with Space
             if (keyboard.spaceKey.wasPressedThisFrame && isGrounded)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                 if (animator != null) animator.SetTrigger("Jump");
             }
 
-            // حرکت سریع دش با شیفت
+            // Dash with Left Shift
             if (keyboard.leftShiftKey.wasPressedThisFrame && Time.time >= lastDashTime + dashCooldown)
             {
                 StartCoroutine(PerformDash());
@@ -101,13 +113,15 @@ namespace ChromeDino.Player
             yield return new WaitForSeconds(dashDuration);
 
             rb.gravityScale = prevGravity;
-            rb.linearVelocity = Vector2.zero;
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             isDashing = false;
         }
 
+        private bool isInvulnerable = false;
+
         public void TakeDamage(int damage)
         {
-            if (currentHealth <= 0) return;
+            if (currentHealth <= 0 || isInvulnerable) return;
 
             currentHealth = Mathf.Max(0, currentHealth - damage);
             OnHealthChanged?.Invoke(currentHealth);
@@ -127,9 +141,16 @@ namespace ChromeDino.Player
         {
             if (spriteRenderer == null) yield break;
 
-            spriteRenderer.color = hitColor;
-            yield return new WaitForSeconds(0.2f);
-            spriteRenderer.color = normalColor;
+            isInvulnerable = true;
+            // Damage flash feedback
+            for (int i = 0; i < 3; i++)
+            {
+                spriteRenderer.color = hitColor;
+                yield return new WaitForSeconds(0.12f);
+                spriteRenderer.color = normalColor;
+                yield return new WaitForSeconds(0.12f);
+            }
+            isInvulnerable = false;
         }
 
         public void AddScore(int amount)

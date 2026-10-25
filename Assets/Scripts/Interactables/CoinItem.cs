@@ -4,10 +4,10 @@ using ChromeDino.Player;
 
 namespace ChromeDino.Interactables
 {
-    // سکه و آیتم‌های امتیازی
+    // Collectible coin item
     public class CoinItem : Interactable
     {
-        [SerializeField] private int scoreValue = 10;
+        [SerializeField] private int scoreValue = 50;
         [SerializeField] private float rotateSpeed = 180f;
         [SerializeField] private AudioClip collectSound;
 
@@ -15,15 +15,20 @@ namespace ChromeDino.Interactables
         {
             base.Update();
 
-            // چرخش سکه به دور خود
+            // Rotate coin around Y axis
             transform.Rotate(0f, rotateSpeed * Time.deltaTime, 0f);
         }
 
         public override void Interact(PlayerController player)
         {
+            // Add score on pickup
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.AddScore(scoreValue);
+            }
+            else if (player != null)
+            {
+                player.AddScore(scoreValue);
             }
 
             if (collectSound != null)

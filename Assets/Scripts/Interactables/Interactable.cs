@@ -3,7 +3,7 @@ using ChromeDino.Player;
 
 namespace ChromeDino.Interactables
 {
-    // کلاس پایه برای تمام موانع و آیتم‌های تعاملی بازی
+    // Base class for interactable obstacles and items
     [RequireComponent(typeof(Collider2D))]
     public abstract class Interactable : MonoBehaviour
     {
@@ -12,10 +12,10 @@ namespace ChromeDino.Interactables
 
         protected virtual void Update()
         {
-            // حرکت به سمت چپ صحنه
+            // Move left
             transform.Translate(Vector3.left * (speed * Time.deltaTime), Space.World);
 
-            // حذف آبجکت پس از خروج از کادر دید دوربین
+            // Despawn off-screen
             if (transform.position.x <= despawnX)
             {
                 Destroy(gameObject);
@@ -24,13 +24,14 @@ namespace ChromeDino.Interactables
 
         protected virtual void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.TryGetComponent<PlayerController>(out var player))
+            var player = other.GetComponent<PlayerController>() ?? other.GetComponentInParent<PlayerController>();
+            if (player != null)
             {
                 Interact(player);
             }
         }
 
-        // متد انتزاعی تعامل برای پیاده‌سازی در کلاس‌های فرزند
+        // Abstract interact method for derived classes
         public abstract void Interact(PlayerController player);
     }
 }

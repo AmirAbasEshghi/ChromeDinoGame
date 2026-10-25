@@ -12,7 +12,7 @@ namespace ChromeDino.Core
         public static event Action<int> OnHighScoreChanged;
         public static event Action OnGameOver;
 
-        [Header("تنظیمات امتیاز")]
+        [Header("Score Settings")]
         [SerializeField] private int currentScore = 0;
         private int highScore = 0;
 
@@ -33,9 +33,12 @@ namespace ChromeDino.Core
             }
             Instance = this;
 
-            // لود رکورد از حافظه با پلیرپرفس
+            // Load high score from PlayerPrefs
             highScore = PlayerPrefs.GetInt("HighScore", 0);
         }
+
+        private float scoreTimer = 0f;
+        [SerializeField] private float scoreRate = 10f;
 
         private void Start()
         {
@@ -44,7 +47,21 @@ namespace ChromeDino.Core
             OnHighScoreChanged?.Invoke(highScore);
         }
 
-        // افزایش امتیاز و آپدیت رکورد
+        private void Update()
+        {
+            if (isGameOver || isPaused) return;
+
+            // Increase score continuously while running
+            scoreTimer += Time.deltaTime * scoreRate;
+            if (scoreTimer >= 1f)
+            {
+                int pointsToAdd = Mathf.FloorToInt(scoreTimer);
+                scoreTimer -= pointsToAdd;
+                AddScore(pointsToAdd);
+            }
+        }
+
+        // Add score and update high score
         public void AddScore(int amount)
         {
             if (isGameOver || amount <= 0) return;
@@ -52,7 +69,7 @@ namespace ChromeDino.Core
             currentScore += amount;
             OnScoreChanged?.Invoke(currentScore);
 
-            // ذخیره رکورد جدید در صورت شکسته شدن
+            // Save new high score if beaten
             if (currentScore > highScore)
             {
                 highScore = currentScore;
@@ -62,7 +79,7 @@ namespace ChromeDino.Core
             }
         }
 
-        // پایان بازی
+        // Game over
         public void GameOver()
         {
             if (isGameOver) return;
@@ -72,7 +89,7 @@ namespace ChromeDino.Core
             OnGameOver?.Invoke();
         }
 
-        // پاز و ادامه بازی
+        // Toggle pause
         public void TogglePause()
         {
             if (isGameOver) return;
@@ -81,14 +98,14 @@ namespace ChromeDino.Core
             Time.timeScale = isPaused ? 0f : 1f;
         }
 
-        // ری‌استارت مرحله
+        // Restart current game
         public void RestartGame()
         {
             Time.timeScale = 1f;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 
-        // بازگشت به منوی اصلی
+        // Return to main menu
         public void LoadMainMenu()
         {
             Time.timeScale = 1f;
