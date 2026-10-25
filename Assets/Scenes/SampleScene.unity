@@ -356,6 +356,7 @@ MonoBehaviour:
   coinPrefab: {fileID: 5467121788173663780, guid: fe38e9991674db044939169a1c6e7f91, type: 3}
   spawnX: 14
   groundY: -3.2
+  cactusYOffset: 0.6
   airYOptions:
   - -2.1
   - -1

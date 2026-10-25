@@ -14,7 +14,8 @@ namespace ChromeDino.Environment
 
         [Header("Spawn Position Settings")]
         [SerializeField] private float spawnX = 15f;
-        [SerializeField] private float groundY = -2f;
+        [SerializeField] private float groundY = -3.2f;
+        [SerializeField] private float cactusYOffset = 0.6f;
         [SerializeField] private float[] airYOptions = new float[] { -1f, 0.5f };
 
         [Header("Timing Settings")]
@@ -60,7 +61,7 @@ namespace ChromeDino.Environment
             if (roll < 0.45f && groundObstaclePrefabs != null && groundObstaclePrefabs.Length > 0)
             {
                 int index = Random.Range(0, groundObstaclePrefabs.Length);
-                Instantiate(groundObstaclePrefabs[index], new Vector3(spawnX, groundY, 0f), Quaternion.identity);
+                Instantiate(groundObstaclePrefabs[index], new Vector3(spawnX, groundY + cactusYOffset, 0f), Quaternion.identity);
             }
             // 30% chance for air obstacle
             else if (roll < 0.75f && airObstaclePrefabs != null && airObstaclePrefabs.Length > 0)

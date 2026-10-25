@@ -335,6 +335,8 @@ namespace ChromeDino.EditorTools
             var soSpawner = new SerializedObject(spawner);
             soSpawner.FindProperty("spawnX").floatValue = 14f;
             soSpawner.FindProperty("groundY").floatValue = -3.2f;
+            var propOffset = soSpawner.FindProperty("cactusYOffset");
+            if (propOffset != null) propOffset.floatValue = 0.6f;
 
             var aArray = soSpawner.FindProperty("airYOptions");
             aArray.arraySize = 3;
