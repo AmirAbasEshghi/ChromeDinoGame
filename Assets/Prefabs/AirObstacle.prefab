@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8959489313751836040}
   - component: {fileID: 4431715288826020226}
   - component: {fileID: 8663282400421902747}
+  - component: {fileID: 1548291048201948271}
   m_Layer: 0
   m_Name: AirObstacle
   m_TagString: Untagged
@@ -157,3 +158,25 @@ MonoBehaviour:
   damageAmount: 1
   bobAmplitude: 0.4
   bobFrequency: 3
+--- !u!95 &1548291048201948271
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7034400061721820592}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8b25e9f82d1c4b75a689e4726bf69010, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

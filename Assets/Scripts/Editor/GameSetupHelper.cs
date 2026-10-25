@@ -92,17 +92,29 @@ namespace ChromeDino.EditorTools
             var rootStateMachine = controller.layers[0].stateMachine;
 
             var runState = rootStateMachine.AddState("Run");
+            runState.motion = AssetDatabase.LoadAssetAtPath<Motion>("Assets/Animations/Dino_Run.anim");
+
             var jumpState = rootStateMachine.AddState("Jump");
+            jumpState.motion = AssetDatabase.LoadAssetAtPath<Motion>("Assets/Animations/Dino_Jump.anim");
+
             var hitState = rootStateMachine.AddState("Hit");
+            hitState.motion = AssetDatabase.LoadAssetAtPath<Motion>("Assets/Animations/Dino_Hit.anim");
+
             var deathState = rootStateMachine.AddState("Death");
+            deathState.motion = AssetDatabase.LoadAssetAtPath<Motion>("Assets/Animations/Dino_Death.anim");
 
             rootStateMachine.defaultState = runState;
 
-            // Run to Jump transition
+            // Run to Jump transitions
             var runToJump = runState.AddTransition(jumpState);
             runToJump.AddCondition(AnimatorConditionMode.If, 0, "Jump");
             runToJump.hasExitTime = false;
             runToJump.duration = 0f;
+
+            var runToJumpAir = runState.AddTransition(jumpState);
+            runToJumpAir.AddCondition(AnimatorConditionMode.IfNot, 0, "IsGrounded");
+            runToJumpAir.hasExitTime = false;
+            runToJumpAir.duration = 0f;
 
             // Jump to Run transition
             var jumpToRun = jumpState.AddTransition(runState);
@@ -116,10 +128,18 @@ namespace ChromeDino.EditorTools
             anyToHit.hasExitTime = false;
             anyToHit.duration = 0f;
 
+            // Hit recovery transitions (grounded -> run, airborne -> jump)
             var hitToRun = hitState.AddTransition(runState);
+            hitToRun.AddCondition(AnimatorConditionMode.If, 0, "IsGrounded");
             hitToRun.hasExitTime = true;
             hitToRun.exitTime = 0.2f;
-            hitToRun.duration = 0.05f;
+            hitToRun.duration = 0f;
+
+            var hitToJump = hitState.AddTransition(jumpState);
+            hitToJump.AddCondition(AnimatorConditionMode.IfNot, 0, "IsGrounded");
+            hitToJump.hasExitTime = true;
+            hitToJump.exitTime = 0.2f;
+            hitToJump.duration = 0f;
 
             // AnyState to Death transition
             var anyToDeath = rootStateMachine.AddAnyStateTransition(deathState);
@@ -157,6 +177,8 @@ namespace ChromeDino.EditorTools
             colA.size = new Vector2(1.4f, 0.8f);
             colA.offset = new Vector2(0f, 0f);
             goAir.AddComponent<AirObstacle>();
+            var animA = goAir.AddComponent<Animator>();
+            animA.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animations/BirdAnimator.controller");
             string pathA = "Assets/Prefabs/AirObstacle.prefab";
             var prefabAir = PrefabUtility.SaveAsPrefabAsset(goAir, pathA);
             Object.DestroyImmediate(goAir);
@@ -244,8 +266,8 @@ namespace ChromeDino.EditorTools
 
             var col = playerGo.GetComponent<BoxCollider2D>();
             if (col == null) col = playerGo.AddComponent<BoxCollider2D>();
-            col.size = new Vector2(0.9f, 1.4f);
-            col.offset = new Vector2(0f, 0.7f);
+            col.size = new Vector2(0.9f, 1.8f);
+            col.offset = new Vector2(0f, 0f);
 
             var anim = playerGo.GetComponent<Animator>();
             if (anim == null) anim = playerGo.AddComponent<Animator>();

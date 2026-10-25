@@ -15,36 +15,36 @@ CLOUD_GREY = (180, 180, 180, 255)
 def scale_img(img, factor=2):
     return img.resize((img.width * factor, img.height * factor), Image.Resampling.NEAREST)
 
-# 1. DINO SPRITE (44 x 47)
-dino_raw = Image.new("RGBA", (44, 47), (0, 0, 0, 0))
-d = ImageDraw.Draw(dino_raw)
-
-# Head & Snout
-d.rectangle([22, 0, 43, 16], fill=DARK)
-d.rectangle([41, 10, 43, 14], fill=(0,0,0,0)) # mouth cut
-d.rectangle([25, 2, 28, 5], fill=WHITE)        # eye
-d.rectangle([26, 3, 27, 4], fill=DARK)         # pupil
-
-# Neck & Back
-d.rectangle([22, 17, 34, 28], fill=DARK)
-
-# Body & Chest
-d.rectangle([10, 18, 30, 36], fill=DARK)
-d.rectangle([31, 22, 36, 26], fill=DARK)       # little arm
-
-# Tail
-d.polygon([(10, 24), (0, 18), (2, 28), (10, 32)], fill=DARK)
-
-# Left Leg
-d.rectangle([14, 37, 18, 44], fill=DARK)
-d.rectangle([14, 44, 22, 46], fill=DARK)       # left foot
-
-# Right Leg
-d.rectangle([24, 37, 28, 44], fill=DARK)
-d.rectangle([24, 44, 32, 46], fill=DARK)       # right foot
-
-dino = scale_img(dino_raw, 2) # 88x94
-dino.save(os.path.join(output_dir, "Dino.png"))
+# 1. OFFICIAL GOOGLE CHROME DINO & PTERODACTYL SPRITES
+import urllib.request
+url_sheet = "https://raw.githubusercontent.com/chromium/chromium/main/components/neterror/resources/images/default_100_percent/offline/100-offline-sprite.png"
+temp_sheet = os.path.join(output_dir, "temp_sheet.png")
+try:
+    urllib.request.urlretrieve(url_sheet, temp_sheet)
+    sheet = Image.open(temp_sheet).convert("RGBA")
+    
+    crops = {
+        "Dino_Jump": (848, 2, 892, 49),
+        "Dino_Run1": (936, 2, 980, 49),
+        "Dino_Run2": (980, 2, 1024, 49),
+        "Dino_Hit":  (1024, 2, 1068, 49),
+        "Pterodactyl_Fly1": (134, 2, 180, 42),
+        "Pterodactyl_Fly2": (180, 2, 226, 42),
+    }
+    for name, box in crops.items():
+        cropped = sheet.crop(box)
+        scaled = scale_img(cropped, 2)
+        scaled.save(os.path.join(output_dir, f"{name}.png"))
+    
+    # Update main Dino and Pterodactyl fallback sprites
+    scale_img(sheet.crop(crops["Dino_Jump"]), 2).save(os.path.join(output_dir, "Dino.png"))
+    scale_img(sheet.crop(crops["Pterodactyl_Fly1"]), 2).save(os.path.join(output_dir, "Pterodactyl.png"))
+    
+    if os.path.exists(temp_sheet):
+        os.remove(temp_sheet)
+    print("Official Chromium Dino and Pterodactyl sprites extracted successfully.")
+except Exception as e:
+    print("Failed to download official sheet:", e)
 
 # 2. CACTUS SPRITE (28 x 50)
 cactus_raw = Image.new("RGBA", (28, 50), (0, 0, 0, 0))
@@ -62,26 +62,7 @@ d.rectangle([17, 30, 25, 34], fill=DARK)
 cactus = scale_img(cactus_raw, 2) # 56x100
 cactus.save(os.path.join(output_dir, "Cactus.png"))
 
-# 3. PTERODACTYL (AIR OBSTACLE) (46 x 34)
-ptero_raw = Image.new("RGBA", (46, 34), (0, 0, 0, 0))
-d = ImageDraw.Draw(ptero_raw)
-
-# Head & Beak
-d.polygon([(0, 12), (18, 8), (18, 16)], fill=DARK)
-d.rectangle([14, 10, 16, 12], fill=WHITE)      # eye
-
-# Body
-d.rectangle([18, 10, 34, 18], fill=DARK)
-
-# Tail
-d.polygon([(34, 12), (44, 14), (34, 16)], fill=DARK)
-
-# Wings (Up position)
-d.polygon([(18, 12), (28, 0), (32, 12)], fill=DARK)
-d.polygon([(24, 16), (30, 28), (34, 16)], fill=DARK)
-
-ptero = scale_img(ptero_raw, 2) # 92x68
-ptero.save(os.path.join(output_dir, "Pterodactyl.png"))
+# 3. PTERODACTYL SPRITES (Extracted above from official sheet)
 
 # 4. COIN SPRITE (32 x 32)
 coin = Image.new("RGBA", (32, 32), (0, 0, 0, 0))

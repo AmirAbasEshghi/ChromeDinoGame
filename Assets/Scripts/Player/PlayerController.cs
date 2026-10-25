@@ -35,6 +35,7 @@ namespace ChromeDino.Player
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Color hitColor = Color.red;
         private Color normalColor;
+        private bool isInvulnerable = false;
 
         private Rigidbody2D rb;
         private Animator animator;
@@ -87,8 +88,8 @@ namespace ChromeDino.Player
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
 
-            // Jump with Space
-            if (keyboard.spaceKey.wasPressedThisFrame && isGrounded)
+            // Jump with Space or Up Arrow (classic Chrome Dino controls)
+            if ((keyboard.spaceKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame) && isGrounded)
             {
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
                 if (animator != null) animator.SetTrigger("Jump");
@@ -116,8 +117,6 @@ namespace ChromeDino.Player
             rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
             isDashing = false;
         }
-
-        private bool isInvulnerable = false;
 
         public void TakeDamage(int damage)
         {
@@ -163,7 +162,14 @@ namespace ChromeDino.Player
 
         private void Die()
         {
-            if (animator != null) animator.SetTrigger("Death");
+            StopAllCoroutines();
+            if (spriteRenderer != null) spriteRenderer.color = normalColor;
+            if (animator != null)
+            {
+                animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+                animator.SetTrigger("Death");
+                animator.Update(0f);
+            }
             rb.linearVelocity = Vector2.zero;
             rb.bodyType = RigidbodyType2D.Kinematic;
 
